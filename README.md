@@ -71,14 +71,21 @@ Open **[http://localhost:8000](http://localhost:8000)** in your browser.
 
 ---
 
-## 🌐 Deploy to GitHub Pages
+## 🌐 Deployments
 
-Since the app is entirely static, it can be hosted for free on GitHub Pages:
+### A. Deploy to Vercel (Recommended - Secure API Proxy)
+This project is configured with Vercel Serverless Functions in the `api/` directory. Deploying on Vercel serves as a secure proxy, keeping your OpenWeather API key 100% hidden from client-side browser network inspectors:
 
-1. Push the code to your GitHub repo.
-2. Go to your repository **Settings** -> **Pages**.
-3. Under **Build and deployment**, select **Deploy from a branch**.
-4. Set the branch to **`main`** and folder to **`/ (root)`**, then click **Save**.
-5. Your app will be live at `https://geltrax69.github.io/OpenWeather/` in a few minutes.
+1. Import your GitHub repository into Vercel.
+2. In Vercel Project Settings, navigate to **Environment Variables** and add:
+   - **Name**: `OPENWEATHER_API_KEY`
+   - **Value**: `7b31c2f1ba62f69d07ed0f204b8ab14c`
+3. Deploy the project. The frontend will automatically detect the Vercel environment, bypass local `.env` requirements, and query endpoints safely through `/api/weather`, `/api/forecast`, and `/api/geocoding`.
 
-*(Note: Because the `.env` file is gitignored, the live deployment will default to an empty API Key state. Visitors can enter their own active OpenWeather API key securely via the **Settings** cog in the top-right corner).*
+### B. Deploy to GitHub Pages (Static Direct Query Fallback)
+The app can also be hosted on GitHub Pages:
+1. Go to your repository **Settings** -> **Pages**.
+2. Under **Build and deployment**, select **Deploy from a branch**.
+3. Set the branch to **`main`** and folder to **`/ (root)`**, then click **Save**.
+
+*(Note: Because the `.env` file is gitignored, the GitHub Pages deployment will default to an empty API key state. Visitors can enter their own active OpenWeather API key securely via the **Settings** cog in the top-right corner).*
