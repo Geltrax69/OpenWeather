@@ -16,7 +16,8 @@ const state = {
   activeWeatherTheme: 'clear',
   isFetching: false,
   suggestions: [],
-  activeSuggestionIndex: -1
+  activeSuggestionIndex: -1,
+  useVercelApi: false
 };
 
 // DOM Cache
@@ -99,14 +100,29 @@ async function loadEnv() {
   }
 }
 
+async function checkVercelApiSupport() {
+  try {
+    const response = await fetch('/api/weather?q=test');
+    // Any status other than 404 means the Vercel API routing is active.
+    state.useVercelApi = (response.status !== 404);
+  } catch (e) {
+    state.useVercelApi = false;
+  }
+}
+
 async function initApp() {
   updateCurrentDate();
   renderHistoryChips();
   
-  // Load variables from environment (.env)
-  await loadEnv();
+  // Check if deployed on Vercel with Serverless API backend support
+  await checkVercelApiSupport();
   
-  // Resolve active API key
+  // Load variables from environment (.env) if running locally
+  if (!state.useVercelApi) {
+    await loadEnv();
+  }
+  
+  // Resolve active API key (only for local mode, or if user enters override in settings)
   state.apiKey = localStorage.getItem('weather_planner_api_key') || state.envApiKey || '';
   
   // Pre-fill settings form
@@ -146,15 +162,28 @@ async function fetchWeatherData(queryOrCoords) {
   const unitsParam = state.units;
   let currentUrl, forecastUrl, searchIdentifier;
   
-  if (typeof queryOrCoords === 'object' && queryOrCoords !== null) {
-    const { lat, lon, name } = queryOrCoords;
-    currentUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${state.apiKey}&units=${unitsParam}`;
-    forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${state.apiKey}&units=${unitsParam}`;
-    searchIdentifier = name;
+  if (state.useVercelApi) {
+    if (typeof queryOrCoords === 'object' && queryOrCoords !== null) {
+      const { lat, lon, name } = queryOrCoords;
+      currentUrl = `/api/weather?lat=${lat}&lon=${lon}&units=${unitsParam}`;
+      forecastUrl = `/api/forecast?lat=${lat}&lon=${lon}&units=${unitsParam}`;
+      searchIdentifier = name;
+    } else {
+      currentUrl = `/api/weather?q=${encodeURIComponent(queryOrCoords)}&units=${unitsParam}`;
+      forecastUrl = `/api/forecast?q=${encodeURIComponent(queryOrCoords)}&units=${unitsParam}`;
+      searchIdentifier = queryOrCoords;
+    }
   } else {
-    currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(queryOrCoords)}&appid=${state.apiKey}&units=${unitsParam}`;
-    forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(queryOrCoords)}&appid=${state.apiKey}&units=${unitsParam}`;
-    searchIdentifier = queryOrCoords;
+    if (typeof queryOrCoords === 'object' && queryOrCoords !== null) {
+      const { lat, lon, name } = queryOrCoords;
+      currentUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${state.apiKey}&units=${unitsParam}`;
+      forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${state.apiKey}&units=${unitsParam}`;
+      searchIdentifier = name;
+    } else {
+      currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(queryOrCoords)}&appid=${state.apiKey}&units=${unitsParam}`;
+      forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(queryOrCoords)}&appid=${state.apiKey}&units=${unitsParam}`;
+      searchIdentifier = queryOrCoords;
+    }
   }
   
   try {
@@ -312,7 +341,9 @@ const handleSearchInput = debounce(async (e) => {
     return;
   }
   
-  const geoUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=5&appid=${state.apiKey}`;
+  const geoUrl = state.useVercelApi
+    ? `/api/geocoding?q=${encodeURIComponent(query)}`
+    : `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=5&appid=${state.apiKey}`;
   
   try {
     const response = await fetch(geoUrl);
