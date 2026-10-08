@@ -1,91 +1,87 @@
-# Weather & Packing Planner 🌦️🎒
+# OpenWeather — Weather & Packing Planner
 
-A highly polished, responsive Single Page Application (SPA) that functions as an interactive weather dashboard and automated packing list planner. Built in accordance with **Google Material Design 3** guidelines, it matches ambient themes to live weather conditions.
+> ## Status: 🟡 In Progress
+>
+> <progress value="80" max="100"></progress>
+> **Progress: 80%** — Feature-complete frontend; needs a live API key to fully run.
 
----
+<p align="center">
+  <img src="banner.webp" alt="OpenWeather banner" width="100%" />
+</p>
 
-## 📸 Interface Preview & Logic
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6-yellow)
+![Vercel](https://img.shields.io/badge/Serverless-Vercel-black)
 
-### 1. Interactive Weather Dashboard
-![Weather Dashboard Mockup](dashboard_mockup.png)
-*A preview of the dashboard demonstrating modern grids, large temperature display, feels-like indicator, detailed secondary conditions (humidity, wind, pressure, sunrise/sunset), and the cascades of 3-Day Forecast cards.*
+## What it is
 
-### 2. Smart Packing Recommendation Engine
-![Packing recommendations Infographic](packing_infographic.png)
-*How the packing list adapts: checks live conditions (rain, heat index, wind, snow) and recommends appropriate gear like sunscreen, sunglasses, hats, breathable clothing, umbrellas, or coats, plus travel essentials.*
+A weather dashboard and trip packing planner built as an advanced frontend exercise. Enter a city and it shows current conditions plus a forecast, then generates a packing list tuned to the weather (rain gear, layers, sun protection). It has city search with autocomplete, a 5-item search history, metric/imperial unit toggle, dynamic weather-driven theming, and persists your preferences in `localStorage`. A Vercel serverless layer (`api/`) proxies OpenWeatherMap so the API key never ships to the browser.
 
----
+## What works (verified)
 
-## ✨ Key Features
+- ✅ State management — central `state` object (units, history, city, theme, fetch status) — `app.js`
+- ✅ City search with geocoding autocomplete and keyboard navigation — `app.js`, `api/geocoding.js`
+- ✅ Current weather + forecast fetching with loading states — `api/weather.js`, `api/forecast.js`
+- ✅ Packing list generator driven by conditions — verified in `app.js` packing logic
+- ✅ Dynamic theming — UI theme follows the active weather condition
+- ✅ Units toggle (metric/imperial) + search history persisted to `localStorage`
+- ✅ Serverless proxy keeps the API key server-side (`process.env.OPENWEATHER_API_KEY`) — no key in client code
+- ✅ Mockups — `dashboard_mockup.png`, `packing_infographic.png`
 
-- **Google Material Design 3**: Modern cards, 16–24px rounded corners, soft shadows, hover transitions, and clean typography.
-- **Geocoding Search Autocomplete**: Offers instant city suggestions matching `City, State, Country` format as you type.
-- **Full Keyboard Accessibility (A11y)**: Navigate search suggestions using `ArrowUp` / `ArrowDown` and select with `Enter` or cancel with `Escape`. Includes visible focus indicators.
-- **Dynamic Theming**: Automatically shifts primary, secondary, and background colors to fit current weather conditions:
-  - ☀️ **Clear/Sunny** -> Amber/Orange Theme
-  - ☁️ **Cloudy** -> Slate Gray Theme
-  - 🌧️ **Rainy/Drizzle** -> Cool Blue Theme
-  - ❄️ **Snowy** -> Ice Blue Theme
-  - ⛈️ **Thunderstorm** -> Deep Purple Theme
-  - 🌫️ **Mist/Haze/Fog** -> Charcoal Gray Theme
-- **Packing Planner Rule Engine**: Calculates checklist recommendations dynamically. Allows marking items completed, which persist on browser refresh.
-- **3-Day Forecast Aggregation**: Groups three-hour predictions to output accurate minimum and maximum temperatures and noon icons for future days.
-- **Secure Configuration**: Reads OpenWeather keys from a gitignored local `.env` configuration file, avoiding API key leaks.
-- **Settings Modal**: Instantly update API keys or toggle units between Celsius (°C) and Fahrenheit (°F) on the fly.
+> Verified by reading `app.js`, all three `api/` functions, and `index.html`. Not run end-to-end here: it needs a real OpenWeatherMap API key and a browser.
 
----
+## Tech stack
 
-## 🛠️ Tech Stack
+| Layer | Tech |
+|---|---|
+| Frontend | Vanilla JavaScript (ES modules), HTML, CSS |
+| Backend | Vercel serverless functions (`api/`) |
+| Data | OpenWeatherMap API (key via env / localStorage) |
+| Design | Material Design principles, Material Symbols |
 
-- **Core**: Vanilla HTML5 (semantic tags) & JavaScript (ES6+).
-- **Styling**: Vanilla CSS3 (Custom Variables, CSS Grids, Flexbox, Keyframe animations).
-- **Icons**: Google Material Symbols Font.
-- **Geocoding & Weather APIs**: OpenWeatherMap API (Current, 5-Day Forecast, Direct Geocoding).
+## How to run
 
----
-
-## 🚀 Getting Started
-
-### 1. Prerequisites
-You need an API key from [OpenWeatherMap](https://openweathermap.org/).
-
-### 2. Installation & Setup
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Geltrax69/OpenWeather.git
-   cd OpenWeather
-   ```
-2. Create a `.env` file in the root directory:
-   ```env
-   OPENWEATHER_API_KEY=your_openweather_api_key_here
-   ```
-
-### 3. Running Locally
-Run a lightweight local HTTP server (to allow the app to fetch `.env` file configuration):
-
-**Using Python:**
 ```bash
-python3 -m http.server 8000
+# Option 1: static preview (API calls need a key)
+npx serve .
+# then open http://localhost:3000 and set your API key in the UI
+# (stored in localStorage as weather_planner_api_key)
+
+# Option 2: full stack on Vercel
+vercel env add OPENWEATHER_API_KEY
+vercel deploy
 ```
-Open **[http://localhost:8000](http://localhost:8000)** in your browser.
+
+Get a free key at [openweathermap.org](https://openweathermap.org/api).
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Dashboard mockup](dashboard_mockup.png) | ![Packing infographic](packing_infographic.png) |
+
+## What you can add more
+
+- [ ] Offline mode — cache the last forecast so the page works without network
+- [ ] Hourly forecast strip — currently daily-focused
+- [ ] Packing checklist persistence — let users check items off and save trips
+- [ ] Severe-weather alerts — surface warnings from the API
+- [ ] Multi-city comparison — compare weather across destinations
+- [ ] PWA install support — it already feels like an app
+
+## Project structure
+
+```
+OpenWeather/
+├── index.html              # Dashboard markup
+├── app.js                  # State management, theming, packing logic
+├── style.css               # Material-style UI
+├── api/
+│   ├── weather.js          # Current-conditions proxy
+│   ├── forecast.js         # Forecast proxy
+│   └── geocoding.js        # City search proxy
+├── dashboard_mockup.png
+└── packing_infographic.png
+```
 
 ---
-
-## 🌐 Deployments
-
-### A. Deploy to Vercel (Recommended - Secure API Proxy)
-This project is configured with Vercel Serverless Functions in the `api/` directory. Deploying on Vercel serves as a secure proxy, keeping your OpenWeather API key 100% hidden from client-side browser network inspectors:
-
-1. Import your GitHub repository into Vercel.
-2. In Vercel Project Settings, navigate to **Environment Variables** and add:
-   - **Name**: `OPENWEATHER_API_KEY`
-   - **Value**: `7b31c2f1ba62f69d07ed0f204b8ab14c`
-3. Deploy the project. The frontend will automatically detect the Vercel environment, bypass local `.env` requirements, and query endpoints safely through `/api/weather`, `/api/forecast`, and `/api/geocoding`.
-
-### B. Deploy to GitHub Pages (Static Direct Query Fallback)
-The app can also be hosted on GitHub Pages:
-1. Go to your repository **Settings** -> **Pages**.
-2. Under **Build and deployment**, select **Deploy from a branch**.
-3. Set the branch to **`main`** and folder to **`/ (root)`**, then click **Save**.
-
-*(Note: Because the `.env` file is gitignored, the GitHub Pages deployment will default to an empty API key state. Visitors can enter their own active OpenWeather API key securely via the **Settings** cog in the top-right corner).*
+*README written after code audit on 2026-10-08.*
