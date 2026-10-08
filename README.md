@@ -12,6 +12,15 @@
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-yellow)
 ![Vercel](https://img.shields.io/badge/Serverless-Vercel-black)
 
+## Screenshots
+
+<p align="center">
+  <img src="./screenshot-ui.png" alt="OpenWeather UI" width="100%" />
+  <br />
+  <em>Weather & packing planner UI (needs API key for live data).</em>
+</p>
+
+
 ## What it is
 
 A weather dashboard and trip packing planner built as an advanced frontend exercise. Enter a city and it shows current conditions plus a forecast, then generates a packing list tuned to the weather (rain gear, layers, sun protection). It has city search with autocomplete, a 5-item search history, metric/imperial unit toggle, dynamic weather-driven theming, and persists your preferences in `localStorage`. A Vercel serverless layer (`api/`) proxies OpenWeatherMap so the API key never ships to the browser.
